@@ -1,6 +1,7 @@
 const fs = require("fs");
 const dateFns = require("date-fns");
 const path = require("path");
+const prettifyXml = require('prettify-xml')
 
 class SiteMapper {
     constructor({
@@ -49,13 +50,16 @@ class SiteMapper {
     }
 
     finish() {
-        fs.writeFileSync(
-            path.resolve(this.targetDirectory, "./sitemap.xml"),
-            "</urlset>",
-            {
-                flag: "as"
-            }
-        );
+        const filepath = path.resolve(this.targetDirectory, "./sitemap.xml")
+        const xml = fs.readFileSync(filepath)
+        fs.writeFileSync(filepath, prettifyXml(xml + '</urlset>'))
+    }
+
+    removeEmptyLines(text) {
+        return text
+            .split('\n')
+            .filter((str = '') => Boolean(str.trim()))
+            .join('\n');
     }
 
     /**
@@ -125,15 +129,12 @@ class SiteMapper {
         const exportPathMap = this.nextConfig && this.nextConfig.exportPathMap;
 
         if (exportPathMap) {
-            try{
             pathMap = await exportPathMap(pathMap, {});
-            }
-            catch(err){
-                console.log(err);
-            }
+            // default Next.js pathmap is missing index page
+            pathMap['/'] = pathMap['/'] || {page: '/index'}
         }
 
-        const paths = Object.keys(pathMap);
+        const paths = Object.keys(pathMap).sort();
         const date = dateFns.format(new Date(), "YYYY-MM-DD");
 
         for (var i = 0, len = paths.length; i < len; i++) {
@@ -152,12 +153,14 @@ class SiteMapper {
                 changefreq = pageConfig.changefreq ? `<changefreq>${pageConfig.changefreq}</changefreq>` : '';
             }
 
-            let xmlObject = `<url><loc>${this.baseUrl}${pagePath}</loc>
+            let xmlObject = this.removeEmptyLines(
+                `<url><loc>${this.baseUrl}${pagePath}</loc>
                 ${alternates}
                 ${priority}
                 ${changefreq}
                 <lastmod>${date}</lastmod>
-                </url>`;
+                </url>`
+            );
 
             fs.writeFileSync(
                 path.resolve(this.targetDirectory, "./sitemap.xml"),

@@ -1,10 +1,9 @@
 {
-  "name": "nextjs-sitemap-generator",
+  "name": "@mfgr/nextjs-sitemap-generator",
   "version": "0.4.1",
   "description": "Generate sitemap.xml from nextjs pages",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [
     "nextjs",
     "sitemap.xml",
@@ -15,7 +14,8 @@
   "author": "Adrián Alonso Vergara",
   "license": "MIT",
   "dependencies": {
-    "date-fns": "^1.30.1"
+    "date-fns": "^1.30.1",
+    "prettify-xml": "^1.2.0"
   },
   "homepage": "https://github.com/IlusionDev/nextjs-sitemap-generator"
 }
