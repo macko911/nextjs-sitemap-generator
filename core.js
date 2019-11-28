@@ -124,6 +124,18 @@ class SiteMapper {
         return pathMap;
     }
 
+    // Pass in a url (home is "/", and gets 1.00, every subsequent level gets 0.10 subtracted)
+    getPriority(url) {
+        return `<priority>${((100 - (this.addTrailingSlash(url).split('/').length - 2) * 10) / 100).toFixed(2)}</priority>`;
+    }
+
+    addTrailingSlash (path)  {
+        if (path.charAt(path.length - 1) !== '/') {
+            path += '/'
+        }
+        return path
+    }
+
     async sitemapMapper(dir) {
         var pathMap = this.buildPathMap(dir);
         const exportPathMap = this.nextConfig && this.nextConfig.exportPathMap;
@@ -138,9 +150,9 @@ class SiteMapper {
         const date = dateFns.format(new Date(), "YYYY-MM-DD");
 
         for (var i = 0, len = paths.length; i < len; i++) {
-            let pagePath = paths[i];
+            let pagePath = paths[i].replace(/\/index$/, '');
             let alternates = "";
-            let priority = "";
+            let priority = this.getPriority(pagePath);
             let changefreq = "";
 
             for (let langSite in this.alternatesUrls) {
